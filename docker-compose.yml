@@ -1,0 +1,49 @@
+version: '3.3'
+
+services:
+  db:
+    container_name: inn_example_db
+    image: postgres:12
+    restart: always
+    ports:
+      - 54323:5432
+    volumes:
+      - ./docker/postgresql:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-test_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-qwerty}
+      POSTGRES_DB: ${POSTGRES_DB:-inn_example}
+    networks:
+      - app
+
+  php:
+    build: docker/php
+    ports:
+      - 9001:9000
+    restart: always
+    volumes:
+      - ./:/var/www/symfony:cached
+      - /etc/timezone:/etc/timezone:cached
+    networks:
+      - app
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:1.16.0-alpine
+    ports:
+      - 80:80
+    volumes:
+      - ./:/var/www/symfony:cached
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:cached
+    networks:
+      - app
+    depends_on:
+      - php
+
+volumes:
+  public:
+  postgresql:
+
+networks:
+  app:
