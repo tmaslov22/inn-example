@@ -32,9 +32,12 @@ class HomeController extends AbstractController
             if(!$innEntity) {
 
                 try {
+
+                    $innEntity = $innRepo->find($innData->getInn());
+                    if(!$innEntity) $innEntity = new Inn();
+
                     $payload = $apiCheckerService->check($innData->getInn());
 
-                    $innEntity = new Inn();
                     $innEntity->setInn($innData->getInn());
                     $innEntity->setPayload($payload);
 
